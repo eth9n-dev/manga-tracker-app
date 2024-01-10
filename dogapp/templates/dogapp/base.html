@@ -56,8 +56,15 @@
               </div>
           </div>
           <div class="col py-3">
+            {% if user.is_authenticated %}
+                <div>
+                    <p style="text-align: center;">Random Dog Picture:</p>
+                    <img src="{{dog_picture_url}}" alt="Random Dog Picture" class="img-thumbnails" style="border-radius: 8px; display: block; margin-left: auto; margin-right: auto; width: 200px; height: 200px; object-fit: cover;">
+                </div>
+            {% endif %}
+
             {% block content %}
-            <p>Hello World!</p>
+                <p>Hello World!</p>
             {% endblock %}
           </div>
   </body>

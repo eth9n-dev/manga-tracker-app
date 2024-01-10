@@ -1,6 +1,18 @@
 from django.shortcuts import render
-from django.contrib.auth.models import User
+import requests
+import json
 
 # Create your views here.
-def home(response):
-        return render(response, 'dogapp/base.html')
+def home(request):
+        if request.user.is_authenticated:
+              url = random_dog_picture()
+              return render(request, 'dogapp/base.html', {'dog_picture_url': url})
+        
+        return render(request, 'dogapp/base.html')
+
+def random_dog_picture():
+    f = r"https://random.dog/woof.json"
+    page = requests.get(f)
+    data = json.loads(page.text)
+    url = data['url']
+    return url
