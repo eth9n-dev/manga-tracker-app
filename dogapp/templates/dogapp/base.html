@@ -7,6 +7,42 @@
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
+    {% load crispy_forms_tags %}
+    <script>
+        function openLoader() {
+            var loader = document.createElement('div');
+            loader.className = 'spinner-border';
+            loader.role = 'status';
+    
+            const element = document.getElementById('sub');
+            element.appendChild(loader);
+        }
+    </script>
+    <style>
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+            transition: 0.3s;
+            width: 15%;
+            margin: 5px;
+            padding: 8px;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+        }
+
+        .container {
+            padding: 2px 16px;
+        }
+
+        a {
+            text-decoration: none;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    </style>
   </head>
   <body>
     <div class="container-fluid">
@@ -18,10 +54,15 @@
                   </a>
                   <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
                       <li class="nav-item">
-                          <a href="" class="nav-link align-middle px-0">
+                          <a href="/" class="nav-link align-middle px-0">
                               <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Home</span>
                           </a>
                       </li>
+                      <li class="nav-item">
+                        <a href="/add" class="nav-link align-middle px-0">
+                            <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline">Manga Lists</span>
+                        </a>
+                    </li>
                       <li>
                           <a href="#submenu1" data-bs-toggle="collapse" class="nav-link px-0 align-middle">
                               <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 d-none d-sm-inline">Account</span> </a>
@@ -56,15 +97,7 @@
               </div>
           </div>
           <div class="col py-3">
-            {% if user.is_authenticated %}
-                <div>
-                    <p style="text-align: center;">Random Dog Picture:</p>
-                    <img src="{{dog_picture_url}}" alt="Random Dog Picture" class="img-thumbnails" style="border-radius: 8px; display: block; margin-left: auto; margin-right: auto; width: 200px; height: 200px; object-fit: cover;">
-                </div>
-            {% endif %}
-
             {% block content %}
-                <p>Hello World!</p>
             {% endblock %}
           </div>
   </body>
