@@ -12,4 +12,5 @@ class Manga(models.Model):
     manga_name = models.CharField(max_length=100)
     manga_img = models.CharField(max_length=100)
     manga_url = models.CharField(max_length=100)
+    current_chapter = models.IntegerField(default=0)
     latest_update = models.CharField(max_length=30)

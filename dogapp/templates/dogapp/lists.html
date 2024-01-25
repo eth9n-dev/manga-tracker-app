@@ -20,13 +20,24 @@
         {% endif %}
     </form>
 </div>
+<hr>
 <div class="container-fluid" style="display:flex; flex-wrap: wrap;">
     {% for manga in list.manga_set.all %}
     <div class="card">
+        <form method="POST" action="#">{% csrf_token %}<button type="submit" name="close" class="btn-close" aria-label="Close" value="{{ manga.id }}"></button></form>
         <img src="{{ manga.manga_img }}" style="width: 100%;">
         <div class="text-container">
             <h4><a href="{{ manga.manga_url }}"><b>{{ manga.manga_name }}</b></a></h4>
             <p>Latest Release: {{ manga.latest_update }}</p>
+        </div>
+        <div class="counter-container">
+            <form method="POST">
+                {% csrf_token %}
+                <button class="decrement btn btn-danger" onclick="decrementCounter()" type="button" name="decrement">-1</button>
+                <input type="text" class="currentChapter" id="currentChapter" name="currentChapter" value="{{ manga.current_chapter }}">
+                <button class="increment btn btn-success" onclick="incrementCounter()" type="button" name="increment">+1</button>
+                <button class="chapterNum btn btn-secondary" type="submit" name="chapterNum" value="{{ manga.id }}">Update</button>
+            </form>
         </div>
     </div>
     {% endfor %}

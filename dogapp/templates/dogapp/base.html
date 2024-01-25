@@ -17,6 +17,20 @@
             const element = document.getElementById('sub');
             element.appendChild(loader);
         }
+
+        function incrementCounter() {
+            const element = document.getElementById('currentChapter');
+            var chapterNum = parseInt(element.value);
+            chapterNum += 1;
+            element.value = chapterNum;
+        }
+
+        function decrementCounter() {
+            const element = document.getElementById('currentChapter');
+            var chapterNum = parseInt(element.value);
+            chapterNum -= 1;
+            element.value = chapterNum;
+        }
     </script>
     <style>
         .card {
@@ -31,8 +45,47 @@
             box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
         }
 
+        .card:hover .btn-close {
+            display: block;
+        }
+        
+        .btn-close {
+          display: none;
+          position: absolute;
+        }
+
         .container {
             padding: 2px 16px;
+        }
+
+        .currentChapter {
+            width: 15%;
+            vertical-align: baseline;
+        }
+
+        .decrement {
+            width: 15%;
+            text-align: center;
+            vertical-align: baseline;
+            padding: 1px 1px;
+        }
+
+        .increment {
+            width: 15%;
+            text-align: center;
+            vertical-align: baseline;
+            padding: 1px 1px;
+        }
+
+        .counter-container {
+            text-align: center;
+            display: block;
+        }
+
+        .chapterNum {
+            text-align: center;
+            vertical-align: baseline;
+            padding: 2px 2px;
         }
 
         a {

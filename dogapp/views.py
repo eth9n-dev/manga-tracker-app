@@ -17,18 +17,19 @@ user_agents_list = [
 ]
 
 options = Options()
-options.add_argument(f'--user-agent={random.choice(user_agents_list)}')
 options.add_argument('--headless')
+options.add_experimental_option(
+        "prefs", {
+            # block image loading
+            "profile.managed_default_content_settings.images": 2,
+        }
+    )
+
+
 
 # Create your views here.
 def home(request):
-        #list = MangaList.objects.filter(user=request.user)
-
-        #if list in request.user.mangalist.all():
-            #if request.user.is_authenticated: 
-            #      return render(request, 'dogapp/base.html', {"list" : list})
-        
-        return render(request, 'dogapp/base.html')
+      return render(request, 'dogapp/base.html')
 
 def add(response):
       if response.user.is_authenticated:
@@ -72,10 +73,29 @@ def list(response, id):
             else: # invalid link
                   messages.error(response, 'Duplicate or non-existent Manga!')
                   return HttpResponseRedirect('/' + str(id))
+            
+      if response.POST.get('close'): # delete button was pressed
+            mangaId = response.POST.get('close')
+            mangaToDelete = currentList.manga_set.get(id=mangaId)
+            mangaToDelete.delete()
+            return HttpResponseRedirect('/' + str(id))
+
+      if response.POST.get('currentChapter'): # attempting to update current chapter
+            currentChapter = response.POST.get('currentChapter')
+            mangaId = response.POST.get('chapterNum') # chapterNum button stores mangaId
+
+            mangaToUpdate = currentList.manga_set.get(id=mangaId)
+            mangaToUpdate.current_chapter = currentChapter
+
+            mangaToUpdate.save()
+            return HttpResponseRedirect('/' + str(id))
+
 
       return render(response, 'dogapp/lists.html', {'list' : currentList})
 
 def scrapeMangaPage(url):
+      
+      options.add_argument(f'--user-agent={random.choice(user_agents_list)}')
       driver = webdriver.Chrome(options=options)
       driver.get(url)
       html = driver.page_source
@@ -86,12 +106,17 @@ def scrapeMangaPage(url):
       title = titleParent.findChild('a').findChild('img')['alt']
 
       lastUpdateParent = soup.find('ul', class_='main version-chap active')
+      if lastUpdateParent is None:
+            lastUpdateParent = soup.find('ul', class_='main version-chap')
+
       lastUpdate = lastUpdateParent.findChild('li').findChild('span').text
 
       imgUrl = titleParent.findChild('a').findChild('img')['src']
 
       if title is not None and lastUpdate is not None and imgUrl is not None:
-            driver.quit()
             return title, lastUpdate, imgUrl
-      
-      driver.quit()
+
+
+def checkForUpdates():
+      # capture AJAX/XHR response to drastically speed up time
+      return
