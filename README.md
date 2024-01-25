@@ -1,2 +1,2 @@
-# can-i-pet-that-dog
+# manga-tracker-app
  todo
