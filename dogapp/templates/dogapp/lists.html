@@ -33,9 +33,9 @@
         <div class="counter-container">
             <form method="POST">
                 {% csrf_token %}
-                <button class="decrement btn btn-danger" onclick="decrementCounter()" type="button" name="decrement">-1</button>
-                <input type="text" class="currentChapter" id="currentChapter" name="currentChapter" value="{{ manga.current_chapter }}">
-                <button class="increment btn btn-success" onclick="incrementCounter()" type="button" name="increment">+1</button>
+                <button class="decrement btn btn-danger" onclick="decrementCounter({{ manga.id }})" type="button" name="decrement">-1</button>
+                <input type="text" class="currentChapter" id="currentChapter {{ manga.id }}" name="currentChapter" value="{{ manga.current_chapter }}">
+                <button class="increment btn btn-success" onclick="incrementCounter({{ manga.id }})" type="button" name="increment">+1</button>
                 <button class="chapterNum btn btn-secondary" type="submit" name="chapterNum" value="{{ manga.id }}">Update</button>
             </form>
         </div>
