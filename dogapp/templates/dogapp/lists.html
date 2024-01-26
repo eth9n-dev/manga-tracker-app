@@ -21,7 +21,7 @@
     </form>
 </div>
 <hr>
-<div class="container-fluid" style="display:flex; flex-wrap: wrap;">
+<div class="container-fluid" style="display:flex; flex-wrap: wrap; justify-content: center;">
     {% for manga in list.manga_set.all %}
     <div class="card">
         <form method="POST" action="#">{% csrf_token %}<button type="submit" name="close" class="btn-close" aria-label="Close" value="{{ manga.id }}"></button></form>

@@ -9,12 +9,16 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import random
+import requests
 
 user_agents_list = [
     'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.83 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
 ]
+
+searchPrefix = 'https://manhwatop.com/?s='
+searchSuffix = '&post_type=wp-manga&op=&author=&artist=&release=&adult='
 
 options = Options()
 options.add_argument('--headless')
@@ -88,6 +92,8 @@ def list(response, id):
             mangaToUpdate.current_chapter = currentChapter
 
             mangaToUpdate.save()
+            checkForUpdates(currentList)
+            
             return HttpResponseRedirect('/' + str(id))
 
 
@@ -117,6 +123,17 @@ def scrapeMangaPage(url):
             return title, lastUpdate, imgUrl
 
 
-def checkForUpdates():
-      # capture AJAX/XHR response to drastically speed up time
-      return
+def checkForUpdates(currentList):
+      mangas = currentList.manga_set.all()
+      for manga in mangas:
+            searchQuery = prepareSearchQuery(manga.manga_name)
+            x = requests.get(searchQuery, headers={'User-Agent' : random.choice(user_agents_list)})
+            soup = BeautifulSoup(x.text, 'html.parser')
+            print('Checking ' + searchQuery)
+            print(soup.find_all('span', {'class': 'font-meta'})[2].text)
+
+def prepareSearchQuery(mangaName):
+      mangaName = mangaName.replace(' ', '+')
+      searchQuery = searchPrefix + mangaName + searchSuffix
+      return searchQuery
+      
