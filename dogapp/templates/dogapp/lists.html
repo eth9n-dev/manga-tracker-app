@@ -6,10 +6,10 @@
     <h1 style="text-align: center;">{{list.name}}</h1>
 </div>
 <div class="container-fluid" style="justify-content: center; display: flex;">
-    <form onsubmit="openLoader()" method="POST" action="#">
+    <form onsubmit="openLoader()" method="POST">
     {% csrf_token %}
-        <input type="text", name="url" style="vertical-align: middle;" placeholder="https://manhwatop.com">
-        <button type="submit", name="newManga", value="newManga" class="btn btn-success btn-sm">+</button>
+        <input type="text" name="url" style="vertical-align: middle;" placeholder="https://manhwatop.com">
+        <button type="submit" name="newManga" value="newManga" class="btn btn-success btn-sm">+</button>
         <span id="sub" style="vertical-align: middle;"></span>
         {% if messages %}
             <ul class="messages">
@@ -18,6 +18,12 @@
                 {% endfor %}
             </ul>
         {% endif %}
+    </form>
+</div>
+<div class="container-fluid" style="justify-content: center; display: flex; padding: 10px;">
+    <form method="POST" onsubmit="openLoader()">
+        {% csrf_token %}
+        <button type="submit" name="checkUpdate" class="btn btn-primary btn-sm" value="check">Check for Updates <i class="bi bi-arrow-clockwise"></i></button>
     </form>
 </div>
 <hr>

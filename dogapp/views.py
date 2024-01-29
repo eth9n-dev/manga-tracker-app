@@ -8,8 +8,11 @@ from django.forms.models import model_to_dict
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from datetime import date
 import random
 import requests
+
+#--------------------------------------------------------------------------------------------------#
 
 user_agents_list = [
     'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
@@ -26,14 +29,18 @@ options.add_experimental_option(
         "prefs", {
             # block image loading
             "profile.managed_default_content_settings.images": 2,
+            "profile.default_content_setting_values.cookies": 1,
+            "profile.block_third_party_cookies": False,
         }
     )
 
-
+#--------------------------------------------------------------------------------------------------#
 
 # Create your views here.
 def home(request):
       return render(request, 'dogapp/base.html')
+
+#--------------------------------------------------------------------------------------------------#
 
 def add(response):
       if response.user.is_authenticated:
@@ -55,10 +62,12 @@ def add(response):
             
       return redirect('login')
 
+#--------------------------------------------------------------------------------------------------#
+
 def list(response, id):
       currentList = MangaList.objects.get(id=id)
 
-      if response.POST.get('newManga'):
+      if response.POST.get('newManga'): # adding new manga to list
             url = response.POST.get('url')
             
             try:
@@ -92,14 +101,18 @@ def list(response, id):
             mangaToUpdate.current_chapter = currentChapter
 
             mangaToUpdate.save()
+            return HttpResponseRedirect('/' + str(id))
+      
+      if response.POST.get('checkUpdate'): # attempting to update latest update field
             checkForUpdates(currentList)
-            
             return HttpResponseRedirect('/' + str(id))
 
 
       return render(response, 'dogapp/lists.html', {'list' : currentList})
 
-def scrapeMangaPage(url):
+#--------------------------------------------------------------------------------------------------#
+
+def scrapeMangaPage(url): # TODO: Use requests, use search url to find lastUpdate
       
       options.add_argument(f'--user-agent={random.choice(user_agents_list)}')
       driver = webdriver.Chrome(options=options)
@@ -108,8 +121,11 @@ def scrapeMangaPage(url):
 
       soup = BeautifulSoup(html, 'html.parser')
 
-      titleParent = soup.find('div', class_='summary_image')
-      title = titleParent.findChild('a').findChild('img')['alt']
+      titleParent = soup.find('div', class_='post-title')
+      title = titleParent.findChild('h1').text
+
+      imgParent = soup.find('div', class_='summary_image')
+      imgUrl = imgParent.findChild('a').findChild('img')['src']
 
       lastUpdateParent = soup.find('ul', class_='main version-chap active')
       if lastUpdateParent is None:
@@ -117,23 +133,46 @@ def scrapeMangaPage(url):
 
       lastUpdate = lastUpdateParent.findChild('li').findChild('span').text
 
-      imgUrl = titleParent.findChild('a').findChild('img')['src']
-
       if title is not None and lastUpdate is not None and imgUrl is not None:
             return title, lastUpdate, imgUrl
-
-
+      
+      driver.quit()
+      
+#--------------------------------------------------------------------------------------------------#
+      
 def checkForUpdates(currentList):
       mangas = currentList.manga_set.all()
       for manga in mangas:
             searchQuery = prepareSearchQuery(manga.manga_name)
             x = requests.get(searchQuery, headers={'User-Agent' : random.choice(user_agents_list)})
             soup = BeautifulSoup(x.text, 'html.parser')
+            
             print('Checking ' + searchQuery)
-            print(soup.find_all('span', {'class': 'font-meta'})[2].text)
+            newDate = soup.find_all('span', {'class': 'font-meta'})[2].text[0:10]
+
+            formattedDate = formatDate(newDate)
+
+            mangaToUpdate = currentList.manga_set.get(id=manga.id)
+            mangaToUpdate.latest_update = formattedDate
+
+            mangaToUpdate.save()
+
+#--------------------------------------------------------------------------------------------------#
 
 def prepareSearchQuery(mangaName):
       mangaName = mangaName.replace(' ', '+')
       searchQuery = searchPrefix + mangaName + searchSuffix
       return searchQuery
       
+#--------------------------------------------------------------------------------------------------#
+
+def formatDate(originalDate):
+      year = int(originalDate[0:4])
+      month = int(originalDate[5:7])
+      day = int(originalDate[8:])
+
+      d = date(year, month, day)
+      format = '%d %B %Y'
+
+      formattedDate = d.strftime(format)
+      return formattedDate
