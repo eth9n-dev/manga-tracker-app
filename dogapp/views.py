@@ -42,7 +42,7 @@ def home(request):
 
 #--------------------------------------------------------------------------------------------------#
 
-def add(response):
+def add(response): # TODO: Allow user to delete a list
       if response.user.is_authenticated:
             lists = MangaList.objects.filter(user=response.user)
 
@@ -148,6 +148,8 @@ def checkForUpdates(currentList):
             soup = BeautifulSoup(x.text, 'html.parser')
             
             print('Checking ' + searchQuery)
+
+            # Catch exception (manga not in search IndexOutOfBounds)
             newDate = soup.find_all('span', {'class': 'font-meta'})[2].text[0:10]
 
             formattedDate = formatDate(newDate)

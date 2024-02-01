@@ -3,11 +3,13 @@
 {% block title %} Add a Manga {% endblock %}
 {% block content %}
     {% if user.is_authenticated %}
+    <div class="container-fluid" style="padding: 20px;">
         <form method="POST" class="form-group">
             {% csrf_token %}
             {{ form|crispy }}
             <button type="submit" class="btn btn-success">Create List</button>
         </form>
+    
         {% if messages %}
             <ul class="messages">
                 {% for message in messages %}
@@ -15,11 +17,14 @@
                 {% endfor %}
             </ul>
         {% endif %}
-        <ul style="padding: 0;">
+    </div>
+    <hr>
+    <div class="container-fluid" style="padding: 20px;">
+        <ul style="display: grid;">
         {% for list in user.mangalist.all %}
-            <li style="list-style-type: none;"><a href="/{{ list.id }}">{{ list.name }}</a></li>
+            <li style="list-style-type: disclosure-closed; border-bottom: 1px solid black;"><a href="/{{ list.id }}"><h1>{{ list.name }}</h1></a></li>
         {% endfor %}
         </ul>
+    </div>
     {% endif %}
 {% endblock %}
-/* TODO: put stuff in div tags so we can center the form */
