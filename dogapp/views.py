@@ -1,3 +1,6 @@
+import django
+django.setup()
+
 from django.shortcuts import render, redirect
 from .forms import CreateNewList
 from .models import MangaList, Manga
@@ -9,6 +12,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import date
+import multiprocessing as mp
 import random
 import requests
 
@@ -22,6 +26,8 @@ user_agents_list = [
 
 searchPrefix = 'https://manhwatop.com/?s='
 searchSuffix = '&post_type=wp-manga&op=&author=&artist=&release=&adult='
+
+
 
 options = Options()
 options.add_argument('--headless')
@@ -104,9 +110,9 @@ def list(response, id):
             return HttpResponseRedirect('/' + str(id))
       
       if response.POST.get('checkUpdate'): # attempting to update latest update field
-            checkForUpdates(currentList)
+            pool = mp.Pool(processes=4)
+            pool_outputs = pool.map(checkForUpdates, currentList.manga_set.all())
             return HttpResponseRedirect('/' + str(id))
-
 
       return render(response, 'dogapp/lists.html', {'list' : currentList})
 
@@ -136,28 +142,25 @@ def scrapeMangaPage(url): # TODO: Use requests, use search url to find lastUpdat
       if title is not None and lastUpdate is not None and imgUrl is not None:
             return title, lastUpdate, imgUrl
       
-      driver.quit()
-      
 #--------------------------------------------------------------------------------------------------#
       
-def checkForUpdates(currentList):
-      mangas = currentList.manga_set.all()
-      for manga in mangas:
-            searchQuery = prepareSearchQuery(manga.manga_name)
-            x = requests.get(searchQuery, headers={'User-Agent' : random.choice(user_agents_list)})
-            soup = BeautifulSoup(x.text, 'html.parser')
+def checkForUpdates(manga):
+ 
+      searchQuery = prepareSearchQuery(manga.manga_name)
+      x = requests.get(searchQuery, headers={'User-Agent' : random.choice(user_agents_list)})
+      soup = BeautifulSoup(x.text, 'html.parser')
             
-            print('Checking ' + searchQuery)
+      print('Checking ' + searchQuery)
 
-            # Catch exception (manga not in search IndexOutOfBounds)
-            newDate = soup.find_all('span', {'class': 'font-meta'})[2].text[0:10]
+      # Catch exception (manga not in search IndexOutOfBounds)
+      newDate = soup.find_all('span', {'class': 'font-meta'})[2].text[0:10]
 
-            formattedDate = formatDate(newDate)
+      formattedDate = formatDate(newDate)
 
-            mangaToUpdate = currentList.manga_set.get(id=manga.id)
-            mangaToUpdate.latest_update = formattedDate
+      manga.latest_update = formattedDate
+      manga.save()
 
-            mangaToUpdate.save()
+      print('Done')
 
 #--------------------------------------------------------------------------------------------------#
 
